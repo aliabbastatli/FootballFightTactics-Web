@@ -128,8 +128,8 @@
         companyName: "aliabbastatli",
         productName: "Football Fight Tactics",
         productVersion: "0.2.0",
-        // Telefon ekranları 3x yoğunlukta: 2x yeterince keskin, daha akıcı
-        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        // Not: devicePixelRatio burada sınırlanmamalı. iPhone 3x yoğunlukta; 2'ye sınırlamak dokunma
+        // konumlarını kaydırıyordu (butona basmak için iki butonun arasına basmak gerekiyordu).
         showBanner: function (msg, type) { if (type === "error") showError(msg); else console.warn(msg); },
       };
 
