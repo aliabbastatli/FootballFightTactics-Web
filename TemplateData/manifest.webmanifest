@@ -1,0 +1,10 @@
+{
+  "name": "Football Fight Tactics",
+  "short_name": "FFT",
+  "start_url": "../index.html",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "icons": [{ "src": "icon-180.png", "sizes": "180x180", "type": "image/png" }]
+}
