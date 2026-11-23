@@ -15,11 +15,11 @@
     <link rel="icon" type="image/png" href="TemplateData/icon-180.png">
     <link rel="manifest" href="TemplateData/manifest.webmanifest">
     <style>
-      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0; background: #0b0f14;
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0f14;
         font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #eee;
         -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         overscroll-behavior: none; touch-action: none; }
-      #unity-canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%;
+      #unity-canvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh;
         display: block; background: #0b0f14; touch-action: none; outline: none; }
       .overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
         flex-direction: column; text-align: center; background: rgba(8, 11, 15, 0.94); z-index: 10; padding: 24px; box-sizing: border-box; }
@@ -91,37 +91,6 @@
       window.addEventListener("orientationchange", function () { setTimeout(checkOrientation, 200); });
       checkOrientation();
 
-
-      // Canvas'ı görünür alana (visualViewport) piksel olarak sabitler (Unity'ye olay göndermez).
-      // iPhone Safari'de adres/araç çubuğu küçülünce görünür alan değişir; vh/dvh ile Unity'nin önbelleğe
-      // aldığı canvas konumu/boyutu eski kalıp dokunmayı aşağı kaydırıyordu. Burada her değişimde ve
-      // ilk saniyelerde tekrar hesaplanır.
-      var lastW = 0, lastH = 0;
-      function fitCanvas(force) {
-        var vv = window.visualViewport;
-        var w = Math.round(vv ? vv.width : window.innerWidth);
-        var h = Math.round(vv ? vv.height : window.innerHeight);
-        if (window.scrollX || window.scrollY) window.scrollTo(0, 0);
-        if (!force && w === lastW && h === lastH) return;
-        lastW = w; lastH = h;
-        canvas.style.left = "0px"; canvas.style.top = "0px";
-        canvas.style.width = w + "px"; canvas.style.height = h + "px";
-        // Not: Unity'ye yapay "resize" olayı GÖNDERME (Unity'nin resize işleyicisiyle sonsuz özyineleme:
-        // "Maximum call stack size exceeded"). Safari kendi resize olaylarını zaten gönderir.
-      }
-      window.addEventListener("resize", function () { fitCanvas(false); });
-      window.addEventListener("orientationchange", function () { [0, 150, 400, 900].forEach(function (t) { setTimeout(function () { fitCanvas(true); }, t); }); });
-      window.addEventListener("scroll", function () { fitCanvas(false); });
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", function () { fitCanvas(false); });
-        window.visualViewport.addEventListener("scroll", function () { fitCanvas(false); });
-      }
-      document.addEventListener("touchstart", function () { fitCanvas(false); }, { passive: true, capture: true });
-      document.addEventListener("pointerdown", function () { fitCanvas(false); }, { capture: true });
-      fitCanvas(true);
-      var fitTicks = 0;
-      var fitTimer = setInterval(function () { fitCanvas(false); if (++fitTicks > 30) clearInterval(fitTimer); }, 250);
-
       // iOS'ta sayfanın kayması / lastik efekti / çift dokunma yakınlaştırması olmasın
       document.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
       document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
@@ -173,9 +142,6 @@
         }).then(function () {
           show("loading", false);
           updateFsButton();
-          fitCanvas(true);
-          setTimeout(function () { fitCanvas(true); }, 500);
-          setTimeout(function () { fitCanvas(true); }, 1500);
           canvas.focus();
         }).catch(function (message) { showError(message); });
       };
