@@ -15,11 +15,11 @@
     <link rel="icon" type="image/png" href="TemplateData/icon-180.png">
     <link rel="manifest" href="TemplateData/manifest.webmanifest">
     <style>
-      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0f14;
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; position: fixed; inset: 0; background: #0b0f14;
         font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; color: #eee;
         -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         overscroll-behavior: none; touch-action: none; }
-      #unity-canvas { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; height: 100dvh;
+      #unity-canvas { position: fixed; left: 0; top: 0; width: 100%; height: 100%;
         display: block; background: #0b0f14; touch-action: none; outline: none; }
       .overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
         flex-direction: column; text-align: center; background: rgba(8, 11, 15, 0.94); z-index: 10; padding: 24px; box-sizing: border-box; }
@@ -91,6 +91,25 @@
       window.addEventListener("orientationchange", function () { setTimeout(checkOrientation, 200); });
       checkOrientation();
 
+
+      // Canvas'ı görünür alana (visualViewport) piksel olarak sabitler. iPhone Safari'de adres/araç çubuğu
+      // küçülünce görünür alan değişir; vh/dvh ile canvas görünür alandan uzun kalıp dokunmayı aşağı kaydırıyordu.
+      // Unity'ye olay GÖNDERME (yapay "resize" iPhone'da sonsuz özyineleme yaptı). Kare başına en fazla bir kez.
+      var lastW = 0, lastH = 0, fitQueued = false;
+      function fitCanvas() {
+        fitQueued = false;
+        var vv = window.visualViewport;
+        var w = Math.round(vv ? vv.width : window.innerWidth);
+        var h = Math.round(vv ? vv.height : window.innerHeight);
+        if (w === lastW && h === lastH) return;
+        lastW = w; lastH = h;
+        canvas.style.width = w + "px"; canvas.style.height = h + "px";
+      }
+      function queueFit() { if (!fitQueued) { fitQueued = true; requestAnimationFrame(fitCanvas); } }
+      window.addEventListener("orientationchange", function () { setTimeout(queueFit, 150); });
+      if (window.visualViewport) window.visualViewport.addEventListener("resize", queueFit);
+      fitCanvas();
+
       // iOS'ta sayfanın kayması / lastik efekti / çift dokunma yakınlaştırması olmasın
       document.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
       document.addEventListener("gesturestart", function (e) { e.preventDefault(); });
@@ -142,6 +161,7 @@
         }).then(function () {
           show("loading", false);
           updateFsButton();
+          queueFit();
           canvas.focus();
         }).catch(function (message) { showError(message); });
       };
