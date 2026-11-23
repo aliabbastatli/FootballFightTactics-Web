@@ -92,13 +92,12 @@
       checkOrientation();
 
 
-      // Canvas'ı görünür alana (visualViewport) piksel olarak sabitler ve Unity'ye bildirir.
+      // Canvas'ı görünür alana (visualViewport) piksel olarak sabitler (Unity'ye olay göndermez).
       // iPhone Safari'de adres/araç çubuğu küçülünce görünür alan değişir; vh/dvh ile Unity'nin önbelleğe
       // aldığı canvas konumu/boyutu eski kalıp dokunmayı aşağı kaydırıyordu. Burada her değişimde ve
       // ilk saniyelerde tekrar hesaplanır.
-      var lastW = 0, lastH = 0, fitting = false;
+      var lastW = 0, lastH = 0;
       function fitCanvas(force) {
-        if (fitting) return;
         var vv = window.visualViewport;
         var w = Math.round(vv ? vv.width : window.innerWidth);
         var h = Math.round(vv ? vv.height : window.innerHeight);
@@ -107,8 +106,8 @@
         lastW = w; lastH = h;
         canvas.style.left = "0px"; canvas.style.top = "0px";
         canvas.style.width = w + "px"; canvas.style.height = h + "px";
-        fitting = true;
-        try { window.dispatchEvent(new Event("resize")); } finally { fitting = false; }
+        // Not: Unity'ye yapay "resize" olayı GÖNDERME (Unity'nin resize işleyicisiyle sonsuz özyineleme:
+        // "Maximum call stack size exceeded"). Safari kendi resize olaylarını zaten gönderir.
       }
       window.addEventListener("resize", function () { fitCanvas(false); });
       window.addEventListener("orientationchange", function () { [0, 150, 400, 900].forEach(function (t) { setTimeout(function () { fitCanvas(true); }, t); }); });
